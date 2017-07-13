@@ -6,7 +6,6 @@ from bottle import route, request, response, default_app, view, template
 
 @route('/berryinfo.xml')
 def xml_berryinfo():
-	uuid = uuid.uuid4()
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		s.connect(("8.8.8.8", 80))
@@ -37,7 +36,7 @@ def xml_berryinfo():
         <presentationURL>http://{}:{}</presentationURL>
     </device>
 	</root>
-	""".format(uuid, lan_address, args.port)
+	""".format(uuid.uuid4(), lan_address, args.port)
 	response.content_type = 'application/xml'
 	return xml
 
