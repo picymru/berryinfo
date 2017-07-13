@@ -14,19 +14,19 @@ def xml_berryinfo():
     </specVersion>
     <device>
         <deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>
-        <friendlyName>Raspberry Pi</friendlyName>
+        <friendlyName>Raspberry Pi ({})</friendlyName>
         <manufacturer>Raspberry Pi</manufacturer>
         <manufacturerURL>https://www.raspberrypi.org</manufacturerURL>
         <modelDescription>Raspberry Pi</modelDescription>
         <modelName>Raspberry Pi</modelName>
         <modelNumber>3</modelNumber>
         <modelURL>https://www.raspberrypi.org</modelURL>
-        <serialNumber>raspberrypi</serialNumber>
+        <serialNumber>raspberrypi-{}</serialNumber>
         <UDN>{}</UDN>
         <presentationURL>http://{}:{}</presentationURL>
     </device>
 	</root>
-	""".format(uuid.uuid4(), lan_address, args.port)
+	""".format(hostname, hostname.lower(), device_uuid, lan_address, args.port)
 	response.content_type = 'application/xml'
 	return xml
 
@@ -62,7 +62,7 @@ def index():
 
 def main():
 
-	global args, lan_address, hostname
+	global args, device_uuid, lan_address, hostname
 
 	parser = argparse.ArgumentParser()
 
@@ -80,6 +80,8 @@ def main():
 		logging.basicConfig(level=logging.INFO)
 	log = logging.getLogger(__name__)
 
+	device_uuid = uuid.uuid4()
+
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		s.connect(("8.8.8.8", 80))
@@ -92,7 +94,7 @@ def main():
 
 	ssdp = SSDPServer()
 	ssdp.register('local',
-	              'uuid:{}::upnp:rootdevice'.format(uuid.uuid4()),
+	              'uuid:{}::upnp:rootdevice'.format(device_uuid),
 	              'upnp:rootdevice',
 	              'http://{}:{}/berryinfo.xml'.format(lan_address, args.port))
 	try:
