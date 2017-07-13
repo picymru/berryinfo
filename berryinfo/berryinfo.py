@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, sys, argparse, logging, uuid, socket
-from ssdp import SSDPServer
+from .ssdp import SSDPServer
 from bottle import route, request, response, default_app, view, template
 
 @route('/berryinfo.xml')
