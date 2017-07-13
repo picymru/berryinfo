@@ -6,8 +6,40 @@ from bottle import route, request, response, default_app, view, template
 
 @route('/berryinfo.xml')
 def xml_berryinfo():
-	response.content_type = 'text/xml'
-	return "Testing"
+	uuid = uuid.uuid4()
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		s.connect(("8.8.8.8", 80))
+		lan_address = s.getsockname()[0]
+		hostname = socket.gethostname()
+		s.close()
+	except:
+		lan_address = '127.0.0.1'
+		hostname = 'raspberrypi'
+		pass
+	xml = """
+	<root>
+    <specVersion>
+        <major>1</major>
+        <minor>0</minor>
+    </specVersion>
+    <device>
+        <deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>
+        <friendlyName>Raspberry Pi</friendlyName>
+        <manufacturer>Raspberry Pi</manufacturer>
+        <manufacturerURL>https://www.raspberrypi.org</manufacturerURL>
+        <modelDescription>Raspberry Pi</modelDescription>
+        <modelName>Raspberry Pi</modelName>
+        <modelNumber>3</modelNumber>
+        <modelURL>https://www.raspberrypi.org</modelURL>
+        <serialNumber></serialNumber>
+        <UDN>{}</UDN>
+        <presentationURL>http://{}:{}</presentationURL>
+    </device>
+	</root>
+	""".format(uuid, lan_address, args.port)
+	response.content_type = 'application/xml'
+	return xml
 
 @route('/')
 def index():
@@ -31,6 +63,7 @@ def index():
 		s.connect(("8.8.8.8", 80))
 		lan_address = s.getsockname()[0]
 		hostname = socket.gethostname()
+		s.close()
 	except:
 		lan_address = '127.0.0.1'
 		hostname = 'raspberrypi'
@@ -56,11 +89,19 @@ def main():
 		logging.basicConfig(level=logging.INFO)
 	log = logging.getLogger(__name__)
 
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		s.connect(("8.8.8.8", 80))
+		lan_address = s.getsockname()[0]
+	except:
+		lan_address = '127.0.0.1'
+		pass
+
 	ssdp = SSDPServer()
 	ssdp.register('local',
 	              'uuid:{}::upnp:rootdevice'.format(uuid.uuid4()),
 	              'upnp:rootdevice',
-	              'http://{}:5000/berryinfo.xml'.format('127.0.0.1'))
+	              'http://{}:{}/berryinfo.xml'.format(lan_address, args.port))
 	try:
 		app = default_app()
 		ssdp.start()
