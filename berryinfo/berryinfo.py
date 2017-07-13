@@ -6,16 +6,6 @@ from bottle import route, request, response, default_app, view, template
 
 @route('/berryinfo.xml')
 def xml_berryinfo():
-	try:
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.connect(("8.8.8.8", 80))
-		lan_address = s.getsockname()[0]
-		hostname = socket.gethostname()
-		s.close()
-	except:
-		lan_address = '127.0.0.1'
-		hostname = 'raspberrypi'
-		pass
 	xml = """
 	<root>
     <specVersion>
@@ -31,7 +21,7 @@ def xml_berryinfo():
         <modelName>Raspberry Pi</modelName>
         <modelNumber>3</modelNumber>
         <modelURL>https://www.raspberrypi.org</modelURL>
-        <serialNumber></serialNumber>
+        <serialNumber>raspberrypi</serialNumber>
         <UDN>{}</UDN>
         <presentationURL>http://{}:{}</presentationURL>
     </device>
@@ -72,6 +62,8 @@ def index():
 
 def main():
 
+	global args, lan_address, hostname
+
 	parser = argparse.ArgumentParser()
 
 	# General configuration
@@ -92,8 +84,10 @@ def main():
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		s.connect(("8.8.8.8", 80))
 		lan_address = s.getsockname()[0]
+		hostname = socket.gethostname()
 	except:
 		lan_address = '127.0.0.1'
+		hostname = 'raspberrypi'
 		pass
 
 	ssdp = SSDPServer()
