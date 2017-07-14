@@ -47,17 +47,6 @@ def index():
 	</html>
 	'''
 
-	try:
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.connect(("8.8.8.8", 80))
-		lan_address = s.getsockname()[0]
-		hostname = socket.gethostname()
-		s.close()
-	except:
-		lan_address = '127.0.0.1'
-		hostname = 'raspberrypi'
-		pass
-
 	return template(page, ip=lan_address, hostname=hostname)
 
 def main():
