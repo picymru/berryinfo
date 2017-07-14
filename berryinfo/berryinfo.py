@@ -88,8 +88,11 @@ def main():
 	              'http://{}:{}/berryinfo.xml'.format(lan_address, args.port))
 	try:
 		app = default_app()
+		ssdp.daemon = True
 		ssdp.start()
 		app.run(host=args.host, port=args.port, server='tornado')
+	except KeyboardInterrupt:
+		ssdp.shutdown()
 	except:
 		log.error("Unable to start server on {}:{}".format(args.host, args.port))
 
